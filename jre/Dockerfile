@@ -8,10 +8,10 @@ ENV JAVA_VERSION_MAJOR 8
 ENV JAVA_VERSION_MINOR 60
 ENV JAVA_VERSION_BUILD 27
 ENV JAVA_BASE /usr/local/java
-ENV JAVA_HOME $JAVA_BASE/jre
+ENV JAVA_HOME ${JAVA_BASE}/jre
 ENV JAVA_PKG server-jre
 
-ENV PATH ${PATH}:$JAVA_HOME/bin
+ENV PATH ${PATH}:${JAVA_HOME}/bin
 ENV LANG C.UTF-8
 
 # Use workarounds from https://github.com/gliderlabs/docker-alpine/issues/11:
@@ -57,5 +57,4 @@ RUN apk --update add \
         ${JAVA_HOME}/jre/lib/amd64/libjfx*.so
 
 # Start container
-ENTRYPOINT ["/usr/local/java/jdk/bin/java","-Djava.security.egd=file:/dev/urandom"]
-CMD [""]
+CMD ["java","-Djava.security.egd=file:/dev/urandom"]
