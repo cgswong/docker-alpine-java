@@ -5,8 +5,8 @@ MAINTAINER Stuart Wong <cgs.wong@gmail.com>
 # Setup environment
 ENV PKG_URL "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64"
 ENV JAVA_VERSION_MAJOR 8
-ENV JAVA_VERSION_MINOR 66
-ENV JAVA_VERSION_BUILD 17
+ENV JAVA_VERSION_MINOR 92
+ENV JAVA_VERSION_BUILD 14
 ENV JAVA_BASE /usr/local/java
 ENV JAVA_HOME ${JAVA_BASE}/jdk
 ENV JAVA_PKG jdk
