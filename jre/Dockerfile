@@ -1,38 +1,46 @@
-# Docker base image for Oracle JRE 8 w/glibc-2.21
-FROM gliderlabs/alpine:3.3
+# Docker base image for Oracle JRE 8 w/glibc
+FROM gliderlabs/alpine:3.4
 MAINTAINER Stuart Wong <cgs.wong@gmail.com>
 
 # Setup environment
-ENV PKG_URL "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64"
-ENV JAVA_VERSION_MAJOR 8
-ENV JAVA_VERSION_MINOR 92
-ENV JAVA_VERSION_BUILD 14
-ENV JAVA_BASE /usr/local/java
-ENV JAVA_HOME ${JAVA_BASE}/jre
-ENV JAVA_PKG server-jre
-
-ENV PATH ${PATH}:${JAVA_HOME}/bin
-ENV LANG C.UTF-8
+ENV JAVA_VERSION_MAJOR=8 \
+    JAVA_VERSION_MINOR=112 \
+    JAVA_VERSION_BUILD=15 \
+    JAVA_BASE="/usr/local/java" \
+    JAVA_HOME="${JAVA_BASE}/jre" \
+    JAVA_PKG="server-jre" \
+    GLIBC_VERSION="2.23-r3" \
+    PATH="${PATH}:${JAVA_HOME}/bin" \
+    LANG="C.UTF-8" \
 
 # Use workarounds from https://github.com/gliderlabs/docker-alpine/issues/11:
 # 1. Install glibc
 # 2. hotfix /etc/nsswitch.conf, which is apperently required by glibc and is not used in Alpine Linux
-RUN apk --no-cache add \
-      bash \
+RUN apk --no-cache add --update \
       ca-certificates \
       curl &&\
-    curl -sSL --output /tmp/glibc-2.21-r2.apk "${PKG_URL}/glibc-2.21-r2.apk" &&\
-    curl -sSL --output /tmp/glibc-bin-2.21-r2.apk "${PKG_URL}/glibc-bin-2.21-r2.apk" &&\
-    apk --no-cache add --allow-untrusted \
-      /tmp/glibc-2.21-r2.apk \
-      /tmp/glibc-bin-2.21-r2.apk &&\
-    /usr/glibc/usr/bin/ldconfig /lib /usr/glibc/usr/lib &&\
+    for pkg in glibc-${GLIBC_VERSION}.apk glibc-bin-${GLIBC_VERSION}.apk glibc-i18n-${GLIBC_VERSION}.apk; do \
+      curl -sSL --output /tmp/${pkg} "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/${pkg}" ;\
+      apk --no-cache add --allow-untrusted --update /tmp/${pkg} ;\
+    done &&\
+    ( /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 ${LANG} || true ) &&\
+    echo "export LANG=${LANG}" > /etc/profile.d/locale.sh &&\
+    /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib && \
     # Install Java
     mkdir -p ${JAVA_BASE} &&\
-    curl -sSL --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PKG}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz | tar zxf - -C $JAVA_BASE &&\
+    curl -sSL --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+      http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_PKG}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz | tar zxf - -C $JAVA_BASE &&\
     ln -s $JAVA_BASE/jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR} ${JAVA_HOME} &&\
+    # Install unlimited JCE
+    curl -sSL --header "Cookie: oraclelicense=accept-securebackup-cookie" --output /tmp/jce_policy-${JAVA_VERSION_MAJOR}.zip \
+      http://download.oracle.com/otn-pub/java/jce/${JAVA_VERSION_MAJOR}/jce_policy-${JAVA_VERSION_MAJOR}.zip &&\
+    unzip -q /tmp/jce_policy-${JAVA_VERSION_MAJOR}.zip -d /tmp &&\
+    cp -R /tmp/UnlimitedJCEPolicyJDK8/*.jar ${JAVA_HOME}/lib/security/ &&\
+    # DNS fixup
+    sed -i s/#networkaddress.cache.ttl=-1/networkaddress.cache.ttl=30/ ${JAVA_HOME}/lib/security/java.security &&\
     echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf &&\
     # Cleanup
+    apk del curl &&\
     rm -rf /tmp/* \
         ${JAVA_HOME}/*src.zip \
         ${JAVA_HOME}/lib/missioncontrol \
