@@ -21,7 +21,14 @@ test:
     - ~/${CIRCLE_PROJECT_REPONAME}/run-tests.sh
 
 deployment:
+  github:
+    branch: develop
+    commands:
+      - git checkout master
+      - git pull
+      - git merge develop
+      - git push origin master
   hub:
-    branch: master
+    branch: develop
     commands:
       - $DEPLOY
