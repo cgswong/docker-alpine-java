@@ -28,7 +28,3 @@ deployment:
       - git pull
       - git merge develop
       - git push origin master
-  hub:
-    branch: develop
-    commands:
-      - $DEPLOY
