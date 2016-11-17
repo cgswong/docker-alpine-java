@@ -2,7 +2,9 @@
 FROM gliderlabs/alpine:3.4
 MAINTAINER Stuart Wong <cgs.wong@gmail.com>
 
-RUN apk --no-cache add openjdk8  &&\
+ENV JAVA_PKG=openjdk8
+
+RUN apk --no-cache add ${JAVA_PKG}  &&\
     rm -rf /tmp/*
 
 # Start container

@@ -3,14 +3,13 @@ FROM gliderlabs/alpine:3.4
 MAINTAINER Stuart Wong <cgs.wong@gmail.com>
 
 # Setup environment
-ENV JAVA_VERSION_MAJOR=%%JVM_MAJOR%% \
+ENV JAVA_PKG=%%JVM_PKG%% \
+    JAVA_VERSION_MAJOR=%%JVM_MAJOR%% \
     JAVA_VERSION_MINOR=%%JVM_MINOR%% \
     JAVA_VERSION_BUILD=%%JVM_BUILD%% \
-    JAVA_BASE=%%JVM_BASE%% \
-    JAVA_HOME=${JAVA_BASE}/jdk \
-    JAVA_PKG=%%JVM_PKG%% \
-    GLIBC_VERSION=%%GLIBC_VERSION%% \
-    PATH="${PATH}:${JAVA_HOME}/bin" \
+    JAVA_BASE=%%JVM_BASE%%
+ENV JAVA_HOME="${JAVA_BASE}/jdk"
+ENV PATH="${PATH}:${JAVA_HOME}/bin" \
     LANG="C.UTF-8"
 
 # Use workarounds from https://github.com/gliderlabs/docker-alpine/issues/11:
@@ -21,10 +20,8 @@ RUN apk --no-cache upgrade --update &&\
       ca-certificates \
       curl \
       libstdc++ &&\
-    for pkg in glibc-${GLIBC_VERSION}.pkg glibc-bin-${GLIBC_VERSION}.pkg glibc-i18n-${GLIBC_VERSION}.pkg; do \
-      curl -sSL --output /tmp/${pkg} "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/${pkg}" ;\
-      apk --no-cache add --allow-untrusted /tmp/${pkg} ;\
-    done &&\
+    curl -sSL --output /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub &&\
+    apk --no-cache -X http://apkproxy.heroku.com/sgerrand/alpine-pkg-glibc add glibc glibc-bin glibc-i18n &&\
     ( /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 ${LANG} || true ) &&\
     echo "export LANG=${LANG}" > /etc/profile.d/locale.sh &&\
     /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib &&\

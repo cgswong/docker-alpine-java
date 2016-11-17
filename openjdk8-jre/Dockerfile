@@ -1,8 +1,10 @@
-# Docker base image for OpenJRE8.
+# Docker base image for OpenJDK8.
 FROM gliderlabs/alpine:3.4
 MAINTAINER Stuart Wong <cgs.wong@gmail.com>
 
-RUN apk --no-cache add openjdk8-jre  &&\
+ENV JAVA_PKG=openjdk8-jre
+
+RUN apk --no-cache add ${JAVA_PKG}  &&\
     rm -rf /tmp/*
 
 # Start container

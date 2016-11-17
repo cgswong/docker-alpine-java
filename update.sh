@@ -24,7 +24,6 @@ for version in "${versions[@]}"; do
       s/%%JVM_MAJOR%%/${JVM_MAJOR}/g;
       s/%%JVM_MINOR%%/${JVM_MINOR}/g;
       s/%%JVM_BUILD%%/${JVM_BUILD}/g;
-      s/%%JVM_BASE%%/${JVM_BASE}/g;
-      s/%%GLIBC_VERSION%%/${GLIBC_VERSION}/g" Dockerfile.${version}.tpl > "${version}/Dockerfile"
+      s/%%JVM_BASE%%/${JVM_BASE}/g" Dockerfile.${version}.tpl > "${version}/Dockerfile"
 done
 log "${green}Complete${reset}"
