@@ -1,0 +1,27 @@
+general:
+  branches:
+    only:
+      - develop
+
+machine:
+  services:
+    - docker
+  environment:
+    DOCKER_IMAGE: java
+
+dependencies:
+  cache_directories:
+    - "~/docker"
+  override:
+    - docker info
+    - mkdir -p ~/docker
+
+test:
+  override:
+    - ~/${CIRCLE_PROJECT_REPONAME}/run-tests.sh
+
+deployment:
+  hub:
+    branch: master
+    commands:
+      - $DEPLOY
