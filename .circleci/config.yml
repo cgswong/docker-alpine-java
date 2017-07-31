@@ -1,0 +1,52 @@
+---
+version: 2
+
+defaults: &defaults
+
+jobs:
+  build:
+    working_directory: ~/project
+    machine:
+      image: circleci/classic:edge
+      environment:
+        DOCKER_IMAGE: java
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Get Docker version
+          command: |
+            docker info
+  test_version:
+    - run:
+        name: Run tests
+        command: |
+          ~/${CIRCLE_PROJECT_REPONAME}/run-tests.sh
+  deploy:
+    steps:
+      - checkout
+      - run:
+          name: Push application to Docker Hub
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+              git checkout master
+              git pull
+              git merge develop
+              git push origin master
+            fi
+
+workflows:
+  version: 2
+  build_test_and_deploy:
+    jobs:
+      - build
+        filters:
+          branches:
+            only:
+              - develop
+      - test_version
+        requires:
+          - build
+      - deploy
+        requires:
+          - test_version
