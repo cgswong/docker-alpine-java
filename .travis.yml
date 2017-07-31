@@ -1,0 +1,28 @@
+---
+language: ruby
+rvm:
+  - 2.4.1
+
+dist: trusty
+sudo: required
+
+branches:
+  except:
+    - master
+
+services:
+  - docker
+
+env:
+  - DOCKER_IMAGE: java
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - docker --version
+  - docker info
+
+install: true
+
+script:
+  - ${PWD}/run-tests.sh
