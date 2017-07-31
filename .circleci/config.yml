@@ -21,7 +21,7 @@ jobs:
     - run:
         name: Run tests
         command: |
-          ~/${CIRCLE_PROJECT_REPONAME}/run-tests.sh
+          ${CIRCLE_WORKING_DIRECTORY}/${CIRCLE_PROJECT_REPONAME}/run-tests.sh
   deploy:
     steps:
       - checkout
