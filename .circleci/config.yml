@@ -39,14 +39,14 @@ workflows:
   version: 2
   build_test_and_deploy:
     jobs:
-      - build
+      - build:
         filters:
           branches:
             only:
               - develop
       - test_version
-        requires:
-          - build
-      - deploy
-        requires:
-          - test_version
+          requires:
+            - build
+      - deploy:
+          requires:
+            - test_version
