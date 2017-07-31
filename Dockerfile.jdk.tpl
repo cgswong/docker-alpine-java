@@ -1,5 +1,5 @@
 # Docker base image for Oracle JDK w/glibc
-FROM gliderlabs/alpine:3.4
+FROM gliderlabs/alpine:3.6
 MAINTAINER Stuart Wong <cgs.wong@gmail.com>
 
 # Setup environment
