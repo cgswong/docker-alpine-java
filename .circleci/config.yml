@@ -42,8 +42,8 @@ workflows:
       - build:
         filters:
           branches:
-            only:
-              - develop
+            ignore:
+              - master
       - test_version:
           requires:
             - build
