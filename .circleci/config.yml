@@ -44,7 +44,7 @@ workflows:
           branches:
             only:
               - develop
-      - test_version
+      - test_version:
           requires:
             - build
       - deploy:
